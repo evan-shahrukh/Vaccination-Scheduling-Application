@@ -15,7 +15,10 @@ def center_list(request):
     return render(request,"./center/center_list.html",context)
 
 def center_detail(request,id):
-    object = Center.objects.get(id=id)
+    try:
+        object = Center.objects.get(id=id)
+    except Center.DoesNotExist:
+        raise http404("Center detail not found.")
     context = {
         "center" : object
     }
