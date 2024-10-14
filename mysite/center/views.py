@@ -10,8 +10,14 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 
+from django.contrib.auth.decorators import login_required,permission_required
+from django.utils.decorators import method_decorator
+
+from django.contrib.auth.mixins import LoginRequiredMixin,PermissionRequiredMixin
+
 # Create your views here.
 
+@login_required
 def center_list(request):
     object = Center.objects.all()
     pagination = Paginator(object,2)
@@ -22,6 +28,7 @@ def center_list(request):
     }
     return render(request,"./center/center_list.html",context)
 
+@login_required
 def center_detail(request,id):
     try:
         object = Center.objects.get(id=id)
@@ -32,6 +39,8 @@ def center_detail(request,id):
     }
     return render(request,"./center/center_detail.html",context)
 
+@login_required
+@permission_required("center.add_center",raise_exception=True)
 def center_create(request):
     if request.method == "POST":
         form = forms.CenterForm(request.POST)
@@ -50,6 +59,8 @@ def center_create(request):
         }
     return render(request,"./center/center_create.html",context)
 
+@login_required
+@permission_required("center.change_center",raise_exception=True)
 def center_update(request,id):
     try:
         object = Center.objects.get(id=id)
@@ -72,6 +83,8 @@ def center_update(request,id):
     }
     return render(request,"./center/center_update.html",context)
 
+@login_required
+@permission_required("center.delete_center",raise_exception=True)
 def center_delete(request,id):
     try:
         object = Center.objects.get(id=id)
@@ -86,8 +99,9 @@ def center_delete(request,id):
     }
     return render(request,"./center/center_delete.html",context)
     
-    
-class StorageList(ListView):
+
+# @method_decorator(login_required,name="dispatch")
+class StorageList(LoginRequiredMixin,ListView):
     queryset = Storage.objects.all()
     template_name = "./storage/storage_list.html"
     ordering = ["vaccine__name"]
@@ -99,19 +113,23 @@ class StorageList(ListView):
         context["center_id"] = self.kwargs["id"]
         return context
 
-class StorageDetail(DetailView):
+# @method_decorator(login_required,name="dispatch")
+class StorageDetail(LoginRequiredMixin,DetailView):
     model = Storage
     template_name = "./storage/storage_detail.html"
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["available_quantity"] = self.object.total_quantity - self.object.booked_quantity
         return context
-    
-class StorageCreate(SuccessMessageMixin,CreateView):
+
+# @method_decorator(login_required,name="dispatch")
+# @method_decorator(permission_required("center.add_storage",raise_exception=True),name="dispatch")
+class StorageCreate(LoginRequiredMixin,PermissionRequiredMixin,SuccessMessageMixin,CreateView):
     model = Storage
     form_class = forms.StorageForm
     template_name = "./storage/storage_create.html"
     success_message = "Storage Created Successfully!!!"
+    permission_required=("center.add_storage",)
     
     def get_form_kwargs(self):
         kwargs =  super().get_form_kwargs()
@@ -126,11 +144,14 @@ class StorageCreate(SuccessMessageMixin,CreateView):
     def get_success_url(self):
         return reverse("center:storage_list",kwargs={"id" : self.kwargs["id"]})
     
-class StorageUpdate(SuccessMessageMixin,UpdateView):
+# @method_decorator(login_required,name="dispatch")
+# @method_decorator(permission_required("center.change_storage",raise_exception=True),name="dispatch")
+class StorageUpdate(LoginRequiredMixin,PermissionRequiredMixin,SuccessMessageMixin,UpdateView):
     model = Storage
     form_class = forms.StorageForm
     template_name = "./storage/storage_update.html"
     success_message = "Storage Updated Successfully!!!"
+    permission_required = ("center.change_storage",)
     
     def get_form_kwargs(self) -> dict[str, Any]:
         kwargs =  super().get_form_kwargs()
@@ -140,10 +161,13 @@ class StorageUpdate(SuccessMessageMixin,UpdateView):
     def get_success_url(self) -> str:
         return reverse("center:storage_list",kwargs={"id" : self.get_object().center.id})
 
-class StorageDelete(SuccessMessageMixin,DeleteView):
+# @method_decorator(login_required,name="dispatch")
+# @method_decorator(permission_required("center.delete_storage",raise_exception=True),name="dispatch")
+class StorageDelete(LoginRequiredMixin,PermissionRequiredMixin,SuccessMessageMixin,DeleteView):
     model = Storage
     template_name = "./storage/storage_delete.html"
     success_message = "Storage Deleted Successfully!!!"
+    permission_required = ("center.delete_storage",)
     
     def get_success_url(self) -> str:
         return reverse("center:storage_list",kwargs={"id" : self.get_object().center.id})
