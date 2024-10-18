@@ -22,8 +22,8 @@ class Slot(models.Model):
     date = models.DateField(null=True,blank=True)
     start_time = models.TimeField(null=True,blank=True)
     end_time = models.TimeField(null=True,blank=True)
-    max_capacity = models.IntegerField(null=True,blank=True)
-    reserved = models.IntegerField(null=True,blank=True)
+    max_capacity = models.IntegerField(null=True,blank=True,default=0)
+    reserved = models.IntegerField(null=True,blank=True,default=0)
     
     def __str__(self):
         return f"{self.date} | {self.start_time} | {self.end_time}"
