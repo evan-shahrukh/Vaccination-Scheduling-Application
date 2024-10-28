@@ -28,4 +28,20 @@ class Slot(models.Model):
     def __str__(self):
         return f"{self.date} | {self.start_time} | {self.end_time}"
     
-    
+    def is_reserved(self,campaign_id,slot_id):
+        from center.models import Storage 
+        from django.db.models import F
+        
+        slot = Slot.objects.get(id=slot_id)
+        campaign = Campaign.objects.get(id=campaign_id)
+        storage = Storage.objects.get(vaccine=campaign.vaccine,center = campaign.center)
+        
+        if (storage.total_quantity > 0) and (storage.total_quantity > storage.booked_quantity) and (slot.max_capacity > 0) and (slot.max_capacity > slot.reserved):
+            slot.reserved = F("reserved") + 1
+            storage.booked_quantity = F("booked_quantity") + 1
+            slot.save()
+            storage.save()
+            return True
+        return False
+        
+        
