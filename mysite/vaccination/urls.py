@@ -1,5 +1,5 @@
 from django.urls import path
-from vaccination.views import ChooseVaccine,ChooseCampaign,ChooseSlot,ConfirmVaccination,VaccinationList,VaccinationDetail,appointment_letter,vaccination_certificate
+from vaccination.views import ChooseVaccine,ChooseCampaign,ChooseSlot,ConfirmVaccination,VaccinationList,VaccinationDetail,appointment_letter,vaccination_certificate,approve_vaccination
 
 app_name = "vaccination"
 
@@ -12,4 +12,5 @@ urlpatterns = [
     path("confirm_vaccination/<int:campaign_id>/<int:slot_id>/",ConfirmVaccination.as_view(),name="confirm-vaccination"),
     path("appointment_letter/<int:vaccination_id>",appointment_letter,name="appointment-letter"),
     path("vaccination_certificate/<int:vaccination_id>",vaccination_certificate,name="vaccination-certificate"),
+    path("approve_vaccination/<int:vaccination_id>",approve_vaccination,name="approve-vaccination"),
 ]
